@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ready Curtains</title>
+  <!-- Bootstrap CSS (example using Bootstrap 5) -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+
+    .filter-card {
+      background-color: #ffffff;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .curtain-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .curtain-card .card-body {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .filter-title {
+      font-weight: 600;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+
+    label {
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-5">
+    <h1 class="mb-4 text-center">Ready Curtains</h1>
+    <div class="row">
+      <!-- Filter Section (left side) -->
+      <div class="col-md-3">
+        <div class="filter-card">
+          <div class="filter-title">Filter</div>
+          <div class="mb-3">
+            <label for="materialSelect" class="form-label">Material</label>
+            <select class="form-select" id="materialSelect">
+              <!-- Options will be populated dynamically -->
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="dimensionsSelect" class="form-label">Dimensions</label>
+            <select class="form-select" id="dimensionsSelect">
+              <!-- Options will be populated dynamically -->
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="colorSelect" class="form-label">Color</label>
+            <select class="form-select" id="colorSelect">
+              <!-- Options will be populated dynamically -->
+            </select>
+          </div>
+          <button class="btn btn-primary w-100" onclick="applyFilter()">Search</button>
+        </div>
+      </div>
+      <!-- Results Section (right side) -->
+      <div class="col-md-9">
+        <div class="row" id="resultsContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS (optional if you need Bootstrap scripts) -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+  ></script>
+
+  <script>
+    // Sample local data representing ReadyCurtains
+    const curtainsData = [
+      {
+        id: 1,
+        name: "Classic Cotton",
+        description: "A beautiful cotton curtain that fits most windows.",
+        dimensions: "200x250",
+        material: "Cotton",
+        price: 299,
+        color: "Blue",
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/aspro-flowers.appspot.com/o/images%2FCurtain_blue.jpg?alt=media&token=f18e4e66-cddb-4dd5-8997-9f55bd15a560",
+      },
+      {
+        id: 2,
+        name: "Silky Royal",
+        description: "Luxurious silk curtains with a royal finish.",
+        dimensions: "180x220",
+        material: "Silk",
+        price: 599,
+        color: "Orange",
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/aspro-flowers.appspot.com/o/images%2FCurtain_orange.jpg?alt=media&token=74f87c61-be05-4d45-9ce1-40f6c108ca38",
+      },
+      {
+        id: 3,
+        name: "Linen Breeze",
+        description: "Lightweight linen curtains ideal for airy spaces.",
+        dimensions: "200x250",
+        material: "Linen",
+        price: 399,
+        color: "White",
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/aspro-flowers.appspot.com/o/images%2FCurtain_white.jpg?alt=media&token=62266b00-224f-4dd4-9441-2ce6d294a2ac",
+      },
+      {
+        id: 4,
+        name: "Velvet Night",
+        description: "Dark velvet curtains that keep the light out.",
+        dimensions: "220x260",
+        material: "Velvet",
+        price: 799,
+        color: "Black",
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/aspro-flowers.appspot.com/o/images%2FCurtain_black.jpg?alt=media&token=b26e2546-a14c-4679-b1f3-bdae1ed36966",
+      },
+      {
+        id: 5,
+        name: "Patterned Cotton",
+        description: "Colorful patterned cotton for a bright living room.",
+        dimensions: "180x220",
+        material: "Cotton",
+        price: 349,
+        color: "Pink",
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/aspro-flowers.appspot.com/o/images%2FCurtain_pink.jpg?alt=media&token=747ce854-f99d-4507-b8d1-33dbd4e1de89",
+      },
+    ];
+
+    // Populate dropdown options based on curtainsData
+    function populateFilterOptions() {
+      // Gather distinct materials, dimensions, and colors
+      const materials = [...new Set(curtainsData.map(c => c.material))].sort();
+      const dimensions = [...new Set(curtainsData.map(c => c.dimensions))].sort();
+      const colors = [...new Set(curtainsData.map(c => c.color))].sort();
+
+      const materialSelect = document.getElementById("materialSelect");
+      const dimensionsSelect = document.getElementById("dimensionsSelect");
+      const colorSelect = document.getElementById("colorSelect");
+
+      // Clear any existing options (in case reloaded)
+      materialSelect.innerHTML = "";
+      dimensionsSelect.innerHTML = "";
+      colorSelect.innerHTML = "";
+
+      // Insert "All" option for each
+      materialSelect.appendChild(new Option("All", ""));
+      dimensionsSelect.appendChild(new Option("All", ""));
+      colorSelect.appendChild(new Option("All", ""));
+
+      // Populate each select
+      materials.forEach(material =>
+        materialSelect.appendChild(new Option(material, material))
+      );
+      dimensions.forEach(dim =>
+        dimensionsSelect.appendChild(new Option(dim, dim))
+      );
+      colors.forEach(color =>
+        colorSelect.appendChild(new Option(color, color))
+      );
+    }
+
+    // Filter curtains based on the selected values
+    function applyFilter() {
+      const materialValue = document.getElementById("materialSelect").value;
+      const dimensionsValue = document.getElementById("dimensionsSelect").value;
+      const colorValue = document.getElementById("colorSelect").value;
+
+      const filtered = curtainsData.filter(curtain => {
+        // Only filter on a field if the user didn't select "All" (i.e., value isn't empty)
+        if (materialValue && curtain.material !== materialValue) return false;
+        if (dimensionsValue && curtain.dimensions !== dimensionsValue) return false;
+        if (colorValue && curtain.color !== colorValue) return false;
+        return true;
+      });
+
+      renderCurtains(filtered);
+    }
+
+    // Render curtains to the page
+    function renderCurtains(curtains) {
+      const container = document.getElementById("resultsContainer");
+      container.innerHTML = ""; // Clear previous results
+
+      if (!curtains || curtains.length === 0) {
+        container.innerHTML = '<p class="text-muted">No curtains found.</p>';
+        return;
+      }
+
+      curtains.forEach((curtain) => {
+        const colDiv = document.createElement("div");
+        colDiv.className = "col-md-6 col-lg-4 mb-4";
+
+        colDiv.innerHTML = `
+          <div class="card curtain-card h-100">
+            <img
+              src="${curtain.imageUrl}"
+              class="card-img-top"
+              alt="${curtain.name}"
+            />
+            <div class="card-body">
+              <h5 class="card-title">${curtain.name}</h5>
+              <p class="card-text">
+                <strong>Material:</strong> ${curtain.material}<br/>
+                <strong>Dimensions:</strong> ${curtain.dimensions}<br/>
+                <strong>Color:</strong> ${curtain.color}<br/>
+                <strong>Price:</strong> $${curtain.price}
+              </p>
+              <p class="card-text">${curtain.description}</p>
+            </div>
+          </div>
+        `;
+        container.appendChild(colDiv);
+      });
+    }
+
+    // On page load: populate filter selects & render all curtains
+    window.onload = function () {
+      populateFilterOptions();
+      renderCurtains(curtainsData);
+    };
+  </script>
+</body>
+</html>
